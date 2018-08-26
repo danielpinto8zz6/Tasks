@@ -11,27 +11,33 @@ import Foundation
 enum State {
     case done
     case undone
-    case finished
+    case inProgress
 }
 
 class Note {
     var title: String
     var content: String
-    var date: String
+    var date: Date
     var state: State
-    
-    init (title: String, content:String, date:String) {
-        self.title = title
-        self.content = content
-        self.date = date
-        self.state = .undone
-    }
     
     init () {
         self.title = ""
         self.content = ""
-        self.date = ""
+        self.date = Date()
         self.state = .undone
+    }
+    
+    var dateToString : String {
+    get {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        
+        let myString = formatter.string(from: date)
+        let yourDate = formatter.date(from: myString)
+        let dateString = formatter.string(from: yourDate!)
+        
+        return dateString
+        }
     }
     
 }

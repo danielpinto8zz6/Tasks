@@ -14,7 +14,7 @@ class NoteDetailViewController: UIViewController {
     @IBOutlet weak var titleTextField: UITextField!
 
     var note: Note!
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         titleTextField.text = note.title
@@ -26,18 +26,6 @@ class NoteDetailViewController: UIViewController {
         
         note.title = titleTextField.text!
         note.content = contentTextField.text
-        note.date = dateToString(date: datePicker.date)
-    }
-    
-    func dateToString ( date : Date ) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd-MM-yyyy"
-        
-        let myString = formatter.string(from: date)
-        let yourDate = formatter.date(from: myString)
-        formatter.dateFormat = "dd-MMM-yyyy"
-        let dateString = formatter.string(from: yourDate!)
-        
-        return dateString
+        note.date = datePicker.date
     }
 }

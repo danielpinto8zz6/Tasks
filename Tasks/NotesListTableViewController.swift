@@ -15,23 +15,25 @@ class NotesListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.tableView.isEditing = true
+        //self.tableView.isEditing = true
         tableView.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        sort(mode: .byDateAscending)
+
         tableView.reloadData()
     }
     
-    override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+    /* override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
         return false
     }
     
     override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
-        return .none
-    }
+        return UITableViewCellEditingStyle.delete;
+    } */
     
     override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         let note = notes[sourceIndexPath.row]
@@ -69,13 +71,21 @@ class NotesListTableViewController: UITableViewController {
             tableView.reloadData()
         }
         
-        done.backgroundColor = UIColor.green
-        
-        if (notes[indexPath.row].state != .done) {
-            return [delete, done]
+        let inProgress = UITableViewRowAction(style: .default, title: "In progress") { (action, indexPath) in
+            self.notes[indexPath.row].state = .inProgress
+            tableView.reloadData()
         }
-        else {
+        
+        done.backgroundColor = UIColor.green
+        inProgress.backgroundColor = UIColor.yellow
+        
+        switch notes[indexPath.row].state {
+        case .done:
             return [delete]
+        case .inProgress:
+            return [delete, done]
+        case .undone:
+            return [delete, done, inProgress]
         }
     }
     
@@ -88,15 +98,36 @@ class NotesListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "NotesCell", for: indexPath)
         
         cell.textLabel?.text = notes[indexPath.row].title
-        cell.detailTextLabel?.text = notes[indexPath.row].date
+        cell.detailTextLabel?.text = notes[indexPath.row].dateToString
         
         if (notes[indexPath.row].state == .done) {
             cell.detailTextLabel?.textColor = UIColor.green
-        } else if (notes[indexPath.row].state == .finished) {
+        } else if (notes[indexPath.row].state == .inProgress) {
             cell.detailTextLabel?.textColor = UIColor.yellow
         }
         
         return cell
     }
     
+    func sort (mode: SortMode) {
+        switch mode {
+        case .byDateAscending:
+            if (self.notes.count > 1){
+                self.notes = self.notes.sorted(by: {
+                    $0.date.compare($1.date) == .orderedAscending
+                })
+            }
+        case .byDateDescending:
+            if (self.notes.count > 1){
+                self.notes = self.notes.sorted(by: {
+                    $0.date.compare($1.date) == .orderedDescending
+                })
+            }
+        }
+    }
+}
+
+enum SortMode {
+    case byDateAscending
+    case byDateDescending
 }
