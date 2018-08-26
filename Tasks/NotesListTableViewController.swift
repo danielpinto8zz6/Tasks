@@ -15,6 +15,10 @@ class NotesListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        /*if let savedTasks = UserDefaults.standard.object(forKey: "taskss") as? NSData {
+            notes = NSKeyedUnarchiver.unarchiveObject(with: savedTasks as Data) as! [Note]
+        }*/
+        
         //self.tableView.isEditing = true
         tableView.reloadData()
     }
@@ -25,6 +29,12 @@ class NotesListTableViewController: UITableViewController {
         sort(mode: .byDateAscending)
 
         tableView.reloadData()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        /*let data = NSKeyedArchiver.archivedData(withRootObject: notes)
+        UserDefaults.standard.set(data, forKey: "taskss")*/
     }
     
     /* override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
