@@ -9,8 +9,8 @@
 import UIKit
 
 class NoteDetailViewController: UIViewController {
+    @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var contentTextField: UITextView!
-    @IBOutlet weak var dateTextField: UITextField!
     @IBOutlet weak var titleTextField: UITextField!
 
     var note: Note!
@@ -26,6 +26,18 @@ class NoteDetailViewController: UIViewController {
         
         note.title = titleTextField.text!
         note.content = contentTextField.text
-        note.date = dateTextField.text!
+        note.date = dateToString(date: datePicker.date)
+    }
+    
+    func dateToString ( date : Date ) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        
+        let myString = formatter.string(from: date)
+        let yourDate = formatter.date(from: myString)
+        formatter.dateFormat = "dd-MMM-yyyy"
+        let dateString = formatter.string(from: yourDate!)
+        
+        return dateString
     }
 }

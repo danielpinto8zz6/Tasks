@@ -15,6 +15,7 @@ class NotesListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.tableView.isEditing = true
         tableView.reloadData()
     }
     
@@ -24,13 +25,27 @@ class NotesListTableViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+        return false
+    }
+    
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
+        return .none
+    }
+    
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        let note = notes[sourceIndexPath.row]
+        notes.remove(at: sourceIndexPath.row)
+        notes.insert (note, at: destinationIndexPath.row)
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier! == "showNote" {
             let noteDetailViewController = segue.destination as! NoteDetailViewController
             var selectedIndexPath = tableView.indexPathForSelectedRow
             noteDetailViewController.note = notes[selectedIndexPath!.row]
         } else if segue.identifier! == "addNote" {
-            let note = Note(title: "", content: "", date: "")
+            let note = Note()
             notes.append(note)
             let noteDetailViewController = segue.destination as! NoteDetailViewController
             noteDetailViewController.note = note
@@ -42,9 +57,26 @@ class NotesListTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        notes.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        let delete = UITableViewRowAction(style: .destructive, title: "Delete") { (action, indexPath) in
+            self.notes.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        }
+        
+        let done = UITableViewRowAction(style: .default, title: "Done") { (action, indexPath) in
+            self.notes[indexPath.row].state = .done
+            tableView.reloadData()
+        }
+        
+        done.backgroundColor = UIColor.green
+        
+        if (notes[indexPath.row].state != .done) {
+            return [delete, done]
+        }
+        else {
+            return [delete]
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -56,7 +88,15 @@ class NotesListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "NotesCell", for: indexPath)
         
         cell.textLabel?.text = notes[indexPath.row].title
+        cell.detailTextLabel?.text = notes[indexPath.row].date
+        
+        if (notes[indexPath.row].state == .done) {
+            cell.detailTextLabel?.textColor = UIColor.green
+        } else if (notes[indexPath.row].state == .finished) {
+            cell.detailTextLabel?.textColor = UIColor.yellow
+        }
         
         return cell
     }
+    
 }
