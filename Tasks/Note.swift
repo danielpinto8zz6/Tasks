@@ -8,23 +8,33 @@
 
 import Foundation
 
-enum State {
-    case done
-    case undone
-    case inProgress
-}
-
-class Note {
-    var title: String
-    var content: String
-    var date: Date
-    var state: State
+class Note: NSObject, NSCoding {
+    var title: String?
+    var content: String?
+    var date: NSDate?
+    var state: String
     
-    init () {
+    override init () {
         self.title = ""
         self.content = ""
-        self.date = Date()
-        self.state = .undone
+        self.date = NSDate()
+        self.state = "undone"
+    }
+    
+    func encode(with aCoder: NSCoder)
+    {
+        aCoder.encode(self.title, forKey: "title")
+        aCoder.encode(self.content, forKey: "content")
+        aCoder.encode(self.date, forKey: "date")
+        aCoder.encode(self.state, forKey: "state")
+    }
+    
+    required init?(coder aDecoder: NSCoder)
+    {
+        self.title = (aDecoder.decodeObject(forKey: "title") as? String)!
+        self.content = (aDecoder.decodeObject(forKey: "title") as? String)!
+        self.date = (aDecoder.decodeObject(forKey: "date") as? NSDate)!
+        self.state = (aDecoder.decodeObject(forKey: "state") as? String)!
     }
     
     var dateToString : String {
@@ -32,7 +42,7 @@ class Note {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         
-        let myString = formatter.string(from: date)
+        let myString = formatter.string(from: date as! Date)
         let yourDate = formatter.date(from: myString)
         let dateString = formatter.string(from: yourDate!)
         

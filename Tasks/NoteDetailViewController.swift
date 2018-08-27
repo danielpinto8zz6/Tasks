@@ -26,6 +26,6 @@ class NoteDetailViewController: UIViewController {
         
         note.title = titleTextField.text!
         note.content = contentTextField.text
-        note.date = datePicker.date
+        note.date = datePicker.date as NSDate
     }
 }

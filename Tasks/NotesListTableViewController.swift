@@ -15,6 +15,10 @@ class NotesListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let data = UserDefaults.standard.object(forKey: "tasks") as? NSData {
+            notes = NSKeyedUnarchiver.unarchiveObject(with: data as Data) as! [Note]
+        }
+        
         //self.tableView.isEditing = true
         tableView.reloadData()
     }
@@ -22,9 +26,17 @@ class NotesListTableViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        saveTasks()
+        
         sort(mode: .byDateAscending)
 
         tableView.reloadData()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        saveTasks()
     }
     
     /* override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
@@ -67,12 +79,12 @@ class NotesListTableViewController: UITableViewController {
         }
         
         let done = UITableViewRowAction(style: .default, title: "Done") { (action, indexPath) in
-            self.notes[indexPath.row].state = .done
+            self.notes[indexPath.row].state = "done"
             tableView.reloadData()
         }
         
         let inProgress = UITableViewRowAction(style: .default, title: "In progress") { (action, indexPath) in
-            self.notes[indexPath.row].state = .inProgress
+            self.notes[indexPath.row].state = "inProgress"
             tableView.reloadData()
         }
         
@@ -80,11 +92,13 @@ class NotesListTableViewController: UITableViewController {
         inProgress.backgroundColor = UIColor.yellow
         
         switch notes[indexPath.row].state {
-        case .done:
+        case "done":
             return [delete]
-        case .inProgress:
+        case "inProgress":
             return [delete, done]
-        case .undone:
+        case "undone":
+            return [delete, done, inProgress]
+        default:
             return [delete, done, inProgress]
         }
     }
@@ -100,9 +114,9 @@ class NotesListTableViewController: UITableViewController {
         cell.textLabel?.text = notes[indexPath.row].title
         cell.detailTextLabel?.text = notes[indexPath.row].dateToString
         
-        if (notes[indexPath.row].state == .done) {
+        if (notes[indexPath.row].state == "done") {
             cell.detailTextLabel?.textColor = UIColor.green
-        } else if (notes[indexPath.row].state == .inProgress) {
+        } else if (notes[indexPath.row].state == "inProgress") {
             cell.detailTextLabel?.textColor = UIColor.yellow
         }
         
@@ -114,15 +128,22 @@ class NotesListTableViewController: UITableViewController {
         case .byDateAscending:
             if (self.notes.count > 1){
                 self.notes = self.notes.sorted(by: {
-                    $0.date.compare($1.date) == .orderedAscending
+                    $0.date?.compare($1.date as! Date) == .orderedAscending
                 })
             }
         case .byDateDescending:
             if (self.notes.count > 1){
                 self.notes = self.notes.sorted(by: {
-                    $0.date.compare($1.date) == .orderedDescending
+                    $0.date?.compare($1.date as! Date) == .orderedDescending
                 })
             }
+        }
+    }
+    
+    func saveTasks() {
+        if (!notes.isEmpty) {
+            let data = NSKeyedArchiver.archivedData(withRootObject: notes)
+            UserDefaults.standard.set(data, forKey: "tasks")
         }
     }
 }
