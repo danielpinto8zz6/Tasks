@@ -9,7 +9,34 @@
 import UIKit
 
 class NotesListTableViewController: UITableViewController {
+    
+    var mode = 0
 
+    @IBOutlet weak var UISegmentedControl: UISegmentedControl!
+    @IBAction func ToggleEdit(_ sender: Any) {
+        toggleEditMode()
+    }
+    @IBAction func ShowMode(_ sender: Any) {
+        let index = UISegmentedControl.selectedSegmentIndex
+        
+        switch (index) {
+        case 0:
+            mode = 0
+            tableView.reloadData()
+        case 1:
+            mode = 1
+            tableView.reloadData()
+        case 2:
+            mode = 2
+            tableView.reloadData()
+        case 3:
+            mode = 3
+            tableView.reloadData()
+        default:
+            return
+        }
+    }
+    
     var notes : [Note] = []
     
     override func viewDidLoad() {
@@ -19,7 +46,6 @@ class NotesListTableViewController: UITableViewController {
             notes = NSKeyedUnarchiver.unarchiveObject(with: data as Data) as! [Note]
         }
         
-        //self.tableView.isEditing = true
         tableView.reloadData()
     }
     
@@ -38,14 +64,6 @@ class NotesListTableViewController: UITableViewController {
         
         saveTasks()
     }
-    
-    /* override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
-        return false
-    }
-    
-    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
-        return UITableViewCellEditingStyle.delete;
-    } */
     
     override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         let note = notes[sourceIndexPath.row]
@@ -123,6 +141,32 @@ class NotesListTableViewController: UITableViewController {
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        var rowHeight = 40
+        
+        switch mode {
+        case 0:
+            return CGFloat(rowHeight)
+        case 1:
+        if (notes[indexPath.row].state != "undone") {
+            return 0
+        }
+        case 2:
+        if (notes[indexPath.row].state != "inProgress") {
+            return 0
+        }
+        case 3:
+        if (notes[indexPath.row].state != "done") {
+            return 0
+        }
+        default:
+            return CGFloat(rowHeight)
+        }
+
+        return CGFloat(rowHeight)
+    }
+    
     func sort (mode: SortMode) {
         switch mode {
         case .byDateAscending:
@@ -145,6 +189,15 @@ class NotesListTableViewController: UITableViewController {
             let data = NSKeyedArchiver.archivedData(withRootObject: notes)
             UserDefaults.standard.set(data, forKey: "tasks")
         }
+    }
+    
+    func toggleEditMode () {
+        if (tableView.isEditing) {
+            tableView.isEditing = false
+        } else {
+            tableView.isEditing = true
+        }
+        
     }
 }
 
